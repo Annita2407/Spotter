@@ -37,7 +37,7 @@ export default function Profile({ session }) {
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', session.user.id)
+      .eq('id',  session.user.id)
       .single()
     if (data) setUsername(data.username || '')
 
