@@ -92,7 +92,10 @@ export default function Profile({ session }) {
     fetchCounts()
   }, [goals])
 
-  const saveGoal = async () => {
+  const deleteGoal = async (goalId) => {
+  await supabase.from('goals').delete().eq('id', goalId)
+  fetchGoalsAndGroups()
+}const saveGoal = async () => {
     if (!goalTarget) return
     setSavingGoal(true)
     await supabase.from('goals').upsert({
@@ -266,7 +269,7 @@ export default function Profile({ session }) {
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-gray-400">{done} of {goal.target} sessions</p>
                   {goal.is_shared && (
-                    <p className="text-xs text-gray-300">👥 Shared with group</p>
+                    <p className="text-xs text-gray-300">👥 Shared with group</p><button onClick={() => deleteGoal(goal.id)} className="text-xs text-red-400 bg-transparent border-none cursor-pointer">🗑️</button>
                   )}
                 </div>
               </div>
