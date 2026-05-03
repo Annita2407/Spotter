@@ -4,18 +4,17 @@ import BottomNav from '../components/BottomNav'
 
 export default function Profile({ session }) {
   const [username, setUsername] = useState('')
-  const [editing, setEditing] =  useState(false)
+  const [editing, setEditing] = useState(false)
   const [saved, setSaved] = useState(false)
   const [totalCheckins, setTotalCheckins] = useState(0)
-
-  // Goals
-  const [goals, setGoals] = useState([]) // goals for each group
-  const [userGroups, setUserGroups] = useState([]) // groups the user is in
+  const [goals, setGoals] = useState([])
+  const [userGroups, setUserGroups] = useState([])
   const [showGoalForm, setShowGoalForm] = useState(false)
   const [goalTarget, setGoalTarget] = useState('')
   const [goalGroupId, setGoalGroupId] = useState('')
   const [goalShared, setGoalShared] = useState(true)
   const [savingGoal, setSavingGoal] = useState(false)
+  const [checkinCounts, setCheckinCounts] = useState({})
 
   const getWeekStart = () => {
     const now = new Date()
@@ -37,10 +36,9 @@ export default function Profile({ session }) {
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id',  session.user.id)
+      .eq('id', session.user.id)
       .single()
     if (data) setUsername(data.username || '')
-
     const { count } = await supabase
       .from('checkins')
       .select('*', { count: 'exact', head: true })
@@ -49,14 +47,11 @@ export default function Profile({ session }) {
   }
 
   const fetchGoalsAndGroups = async () => {
-    // Fetch user's groups
     const { data: groupMembers } = await supabase
       .from('group_members')
       .select('group_id, groups(id, name)')
       .eq('user_id', session.user.id)
     setUserGroups(groupMembers || [])
-
-    // Fetch this week's goals
     const { data: goalsData } = await supabase
       .from('goals')
       .select('*, groups(name)')
@@ -78,8 +73,6 @@ export default function Profile({ session }) {
     return data?.length || 0
   }
 
-  const [checkinCounts, setCheckinCounts] = useState({})
-
   useEffect(() => {
     if (goals.length === 0) return
     const fetchCounts = async () => {
@@ -93,9 +86,11 @@ export default function Profile({ session }) {
   }, [goals])
 
   const deleteGoal = async (goalId) => {
-  await supabase.from('goals').delete().eq('id', goalId)
-  fetchGoalsAndGroups()
-}const saveGoal = async () => {
+    await supabase.from('goals').delete().eq('id', goalId)
+    fetchGoalsAndGroups()
+  }
+
+  const saveGoal = async () => {
     if (!goalTarget) return
     setSavingGoal(true)
     await supabase.from('goals').upsert({
@@ -135,9 +130,7 @@ export default function Profile({ session }) {
       <div className="bg-white border-b border-gray-100 px-5 py-4">
         <span className="logo text-2xl">SPOTTER</span>
       </div>
-
       <div className="px-5 py-5">
-        {/* Profile card */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100 mb-4 flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-[#EAF3DE] flex items-center justify-center text-[#3B6D11] font-medium text-lg">
             {initials}
@@ -167,7 +160,6 @@ export default function Profile({ session }) {
 
         {saved && <p className="text-xs text-[#3B6D11] text-center mb-3">Username saved!</p>}
 
-        {/* Stats */}
         <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Stats</p>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-white rounded-2xl p-4 border border-gray-100 text-center">
@@ -180,7 +172,6 @@ export default function Profile({ session }) {
           </div>
         </div>
 
-        {/* Weekly Goals */}
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-gray-400 uppercase tracking-wider">This week's goals</p>
           <button
@@ -191,23 +182,20 @@ export default function Profile({ session }) {
           </button>
         </div>
 
-        {/* Goal form */}
         {showGoalForm && (
           <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-3">
             <p className="text-sm font-medium text-[#1a1a1a] mb-3">New weekly goal</p>
-
-            <p className="text-xs text-gray-400 mb-1">Group</p>
+            <p className="text-xs text-gray-400 mb-1">Group (optional)</p>
             <select
               value={goalGroupId}
               onChange={e => setGoalGroupId(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#3B6D11] mb-3"
             >
-              <option value="">Select a group...</option>
+              <option value="">No group (personal goal)</option>
               {userGroups.map(gm => (
                 <option key={gm.group_id} value={gm.group_id}>{gm.groups?.name}</option>
               ))}
             </select>
-
             <p className="text-xs text-gray-400 mb-1">Target (sessions this week)</p>
             <input
               type="number"
@@ -218,7 +206,6 @@ export default function Profile({ session }) {
               placeholder="e.g. 4"
               className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#3B6D11] mb-3"
             />
-
             <div className="flex items-center gap-2 mb-4">
               <input
                 type="checkbox"
@@ -229,7 +216,6 @@ export default function Profile({ session }) {
               />
               <label htmlFor="share-goal" className="text-sm text-gray-600">Share with group</label>
             </div>
-
             <button
               onClick={saveGoal}
               disabled={!goalTarget || savingGoal}
@@ -240,7 +226,6 @@ export default function Profile({ session }) {
           </div>
         )}
 
-        {/* Goals list */}
         {goals.length === 0 && !showGoalForm ? (
           <div className="bg-white rounded-2xl p-5 border border-gray-100 text-center mb-4">
             <p className="text-sm text-gray-400">No goal set for this week.</p>
@@ -255,11 +240,13 @@ export default function Profile({ session }) {
               <div key={goal.id} className="bg-white rounded-2xl p-4 border border-gray-100 mb-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-[#1a1a1a]">{goal.groups?.name || 'Personal goal'}</p>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${completed ? 'bg-[#EAF3DE] text-[#3B6D11]' : 'bg-gray-100 text-gray-500'}`}>
-                    {completed ? '🎉 Done!' : `${done}/${goal.target}`}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${completed ? 'bg-[#EAF3DE] text-[#3B6D11]' : 'bg-gray-100 text-gray-500'}`}>
+                      {completed ? '🎉 Done!' : `${done}/${goal.target}`}
+                    </span>
+                    <button onClick={() => deleteGoal(goal.id)} className="text-gray-300 bg-transparent border-none cursor-pointer text-base">🗑️</button>
+                  </div>
                 </div>
-                {/* Progress bar */}
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
                   <div
                     className="bg-[#639922] h-2 rounded-full transition-all"
@@ -269,7 +256,7 @@ export default function Profile({ session }) {
                 <div className="flex justify-between items-center">
                   <p className="text-xs text-gray-400">{done} of {goal.target} sessions</p>
                   {goal.is_shared && (
-                    <p className="text-xs text-gray-300">👥 Shared with group</p><button onClick={() => deleteGoal(goal.id)} className="text-xs text-red-400 bg-transparent border-none cursor-pointer">🗑️</button>
+                    <p className="text-xs text-gray-300">👥 Shared with group</p>
                   )}
                 </div>
               </div>
