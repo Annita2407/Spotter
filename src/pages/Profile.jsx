@@ -229,7 +229,7 @@ export default function Profile({ session }) {
 
             <button
               onClick={saveGoal}
-              disabled={!goalTarget || !goalGroupId || savingGoal}
+              disabled={!goalTarget || savingGoal}
               className="w-full bg-[#3B6D11] text-[#C0DD97] py-3 rounded-xl font-medium text-sm border-none cursor-pointer disabled:opacity-40"
             >
               {savingGoal ? 'Saving...' : 'Save goal'}
