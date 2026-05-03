@@ -251,7 +251,7 @@ export default function Profile({ session }) {
             return (
               <div key={goal.id} className="bg-white rounded-2xl p-4 border border-gray-100 mb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-[#1a1a1a]">{goal.groups?.name}</p>
+                  <p className="text-sm font-medium text-[#1a1a1a]">{goal.groups?.name || 'Personal goal'}</p>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${completed ? 'bg-[#EAF3DE] text-[#3B6D11]' : 'bg-gray-100 text-gray-500'}`}>
                     {completed ? '🎉 Done!' : `${done}/${goal.target}`}
                   </span>
