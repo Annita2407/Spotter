@@ -4,7 +4,7 @@ import BottomNav from '../components/BottomNav'
 
 export default function Profile({ session }) {
   const [username, setUsername] = useState('')
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] =  useState(false)
   const [saved, setSaved] = useState(false)
   const [totalCheckins, setTotalCheckins] = useState(0)
 
