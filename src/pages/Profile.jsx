@@ -93,11 +93,11 @@ export default function Profile({ session }) {
   }, [goals])
 
   const saveGoal = async () => {
-    if (!goalTarget || !goalGroupId) return
+    if (!goalTarget) return
     setSavingGoal(true)
     await supabase.from('goals').upsert({
       user_id: session.user.id,
-      group_id: goalGroupId,
+      group_id: goalGroupId || null,
       target: parseInt(goalTarget),
       week_start: weekStart,
       is_shared: goalShared,
